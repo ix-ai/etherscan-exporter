@@ -35,7 +35,8 @@ class EtherscanCollector:
         if os.environ.get('TOKENS'):
             self.settings['tokens'] = (json.loads(os.environ.get("TOKENS")))
 
-    def _get_tokens(self):
+    def get_tokens(self):
+        """ Gets the tokens from an account """
         # Ensure that we don't get blocked
         time.sleep(1)
         for account in self.accounts:
@@ -73,7 +74,8 @@ class EtherscanCollector:
 
         LOG.debug('Tokens: {}'.format(self.tokens))
 
-    def _get_balances(self):
+    def get_balances(self):
+        """ Gets the current balance for an account """
         request_data = {
             'module': 'account',
             'action': 'balancemulti',
@@ -97,6 +99,10 @@ class EtherscanCollector:
                 })
         LOG.debug('Accounts: {}'.format(self.accounts))
 
+    def describe(self):
+        """ Just a needed method, so that collect() isn't called at startup """
+        return []
+
     def collect(self):
         """The method that actually does the collecting"""
         metrics = {
@@ -106,7 +112,7 @@ class EtherscanCollector:
                 labels=['source_currency', 'currency', 'account', 'type']
             ),
         }
-        self._get_balances()
+        self.get_balances()
         for account in self.accounts:
             metrics['account_balance'].add_metric(
                 value=(self.accounts[account]),
@@ -118,7 +124,7 @@ class EtherscanCollector:
                 ]
             )
 
-        self._get_tokens()
+        self.get_tokens()
         for token in self.tokens:
             metrics['account_balance'].add_metric(
                 value=(self.tokens[token]['value']),
