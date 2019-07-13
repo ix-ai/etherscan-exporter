@@ -5,7 +5,7 @@ RUN apk add --no-cache py3-requests
 
 ENV LOGLEVEL=INFO
 
-COPY etherscan-exporter.py /
+COPY src/etherscan-exporter.py /
 
 EXPOSE 9308
 
