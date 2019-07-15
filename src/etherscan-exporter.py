@@ -7,6 +7,7 @@ import os
 import sys
 import json
 import requests
+import pygelf
 from prometheus_client import start_http_server
 from prometheus_client.core import REGISTRY, GaugeMetricFamily
 
@@ -17,6 +18,22 @@ logging.basicConfig(
     format='%(asctime)s.%(msecs)03d %(levelname)s {%(module)s} [%(funcName)s] %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
 )
+
+
+def configure_logging():
+    """ Configures the logging """
+    gelf_enabled: False
+
+    if os.environ.get('GELF_HOST'):
+        GELF = pygelf.GelfUdpHandler(
+            host=os.environ.get('GELF_HOST'),
+            port=int(os.environ.get('GELF_PORT', 12201)),
+            debug=True,
+            include_extra_fields=True,
+        )
+        LOG.addHandler(GELF)
+        gelf_enabled = True
+    LOG.info('Initialized logging with GELF enabled: {}'.format(gelf_enabled))
 
 
 class EtherscanCollector:
@@ -32,13 +49,16 @@ class EtherscanCollector:
             'addresses': os.environ.get("ADDRESSES"),
             'tokens': [],
         }
+        if not self.settings.get('api_key'):
+            raise ValueError("Missing API_KEY environment variable.")
+
         if os.environ.get('TOKENS'):
             self.settings['tokens'] = (json.loads(os.environ.get("TOKENS")))
 
     def get_tokens(self):
         """ Gets the tokens from an account """
-        # Ensure that we don't get blocked
-        time.sleep(1)
+
+        time.sleep(1)  # Ensure that we don't get rate limited
         for account in self.accounts:
             for token in self.settings['tokens']:
                 request_data = {
@@ -59,7 +79,7 @@ class EtherscanCollector:
                         requests.exceptions.ConnectionError,
                         requests.exceptions.ReadTimeout,
                 ) as error:
-                    LOG.warning(error)
+                    LOG.exception('Exception caught: {}'.format(error))
                     req = {}
                 if req.get('result') and int(req['result']) > 0:
                     self.tokens.update({
@@ -90,7 +110,7 @@ class EtherscanCollector:
                 requests.exceptions.ConnectionError,
                 requests.exceptions.ReadTimeout,
         ) as error:
-            LOG.warning(error)
+            LOG.exception('Exception caught: {}'.format(error))
             req = {}
         if req.get('message') == 'OK' and req.get('result'):
             for result in req.get('result'):
@@ -140,8 +160,10 @@ class EtherscanCollector:
 
 
 if __name__ == '__main__':
-    LOG.info("Starting")
+    configure_logging()
+    PORT = int(os.environ.get('PORT', 9308))
+    LOG.info("Starting on port {}".format(PORT))
     REGISTRY.register(EtherscanCollector())
-    start_http_server(9308)
+    start_http_server(PORT)
     while True:
         time.sleep(1)
