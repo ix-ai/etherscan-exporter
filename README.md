@@ -1,7 +1,13 @@
 # etherscan-exporter
+
+[![Pipeline Status](https://gitlab.com/ix.ai/etherscan-exporter/badges/master/pipeline.svg)](https://gitlab.com/ix.ai/etherscan-exporter/)
+[![Docker Stars](https://img.shields.io/docker/stars/ixdotai/etherscan-exporter.svg)](https://hub.docker.com/r/ixdotai/etherscan-exporter/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/ixdotai/etherscan-exporter.svg)](https://hub.docker.com/r/ixdotai/etherscan-exporter/)
+[![Gitlab Project](https://img.shields.io/badge/GitLab-Project-554488.svg)](https://gitlab.com/ix.ai/etherscan-exporter/)
+
 Prometheus exporter for [etherscan.io](https://etherscan.io).
 
-## Usage
+## Usage:
 ```
 docker run --rm -it -p 9308:9308 \
   -e LOGLEVEL=DEBUG \
@@ -12,7 +18,7 @@ docker run --rm -it -p 9308:9308 \
   registry.gitlab.com/ix.ai/etherscan-exporter:latest
 ```
 
-## Supported variables
+## Supported variables:
 * `API_KEY` (no default - **mandatory**) - set this to your Etherscan API key
 * `URL` (default: https://api.etherscan.io/api) - set this to your Etherscan API secret
 * `ADDRESSES` (no default) - a comma separated list of the ETH addresses to export
@@ -22,10 +28,16 @@ docker run --rm -it -p 9308:9308 \
 * `PORT` (defaults to `9308`) - the listen port for the exporter
 * `LOGLEVEL` (defaults to `INFO`)
 
-## Tokens
+## Tokens variable:
 Example:
 ```
 TOKENS='[{"contract":"0x9b70740e708a083c6ff38df52297020f5dfaa5ee","name":"Daneel","short":"DAN","decimals": 10}]'
 ```
 
 The technical information can be found on [etherscan.io](https://etherscan.io/token/0x9b70740e708a083c6ff38df52297020f5dfaa5ee#readContract)
+
+## Resources:
+* GitLab: https://gitlab.com/ix.ai/etherscan-exporter
+* Docker Hub: https://hub.docker.com/r/ixdotai/etherscan-exporter
+
+See also [ix.ai/crypto-exporter](https://gitlab.com/ix.ai/crypto-exporter) for more usage examples, including Prometheus configuration

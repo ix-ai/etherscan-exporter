@@ -1,11 +1,14 @@
-FROM registry.gitlab.com/ix.ai/alpine:latest
-LABEL MAINTAINER="docker@ix.ai"
+FROM alpine:latest
+LABEL maintainer="docker@ix.ai"
 
-ARG PORT
+ARG PORT=9308
+ARG LOGLEVEL=INFO
 
-RUN apk add --no-cache py3-requests
+RUN apk --no-cache upgrade && \
+    apk add --no-cache py3-requests && \
+    pip3 install --no-cache-dir prometheus_client pygelf
 
-ENV LOGLEVEL=INFO PORT=${PORT}
+ENV LOGLEVEL=${LOGLEVEL} PORT=${PORT}
 
 COPY src/etherscan-exporter.py /
 
