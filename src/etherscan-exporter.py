@@ -10,6 +10,7 @@ import requests
 import pygelf
 from prometheus_client import start_http_server
 from prometheus_client.core import REGISTRY, GaugeMetricFamily
+import constants
 
 LOG = logging.getLogger(__name__)
 logging.basicConfig(
@@ -163,7 +164,8 @@ class EtherscanCollector:
 if __name__ == '__main__':
     configure_logging()
     PORT = int(os.environ.get('PORT', 9308))
-    LOG.info("Starting on port {}".format(PORT))
+    # pylint: disable=no-member
+    LOG.info("Starting etherscan-exporter {} on port {}".format(constants.VERSION, PORT))
     REGISTRY.register(EtherscanCollector())
     start_http_server(PORT)
     while True:
