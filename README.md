@@ -36,8 +36,17 @@ TOKENS='[{"contract":"0x9b70740e708a083c6ff38df52297020f5dfaa5ee","name":"Daneel
 
 The technical information can be found on [etherscan.io](https://etherscan.io/token/0x9b70740e708a083c6ff38df52297020f5dfaa5ee#readContract)
 
+## Tags and Arch
+
+Starting with version v0.3.0, the images are multi-arch, with builds for amd64, arm64 and armv7.
+* `vN.N.N` - for example v0.3.0
+* `latest` - always pointing to the latest version
+* `dev-branch` - the last build on a feature/development branch
+* `dev-master` - the last build on the master branch
+
 ## Resources:
 * GitLab: https://gitlab.com/ix.ai/etherscan-exporter
+* GitHub: https://github.com/ix-ai/etherscan-exporter
 * Docker Hub: https://hub.docker.com/r/ixdotai/etherscan-exporter
 
 See also [ix.ai/crypto-exporter](https://gitlab.com/ix.ai/crypto-exporter) for more usage examples, including Prometheus configuration
