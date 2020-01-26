@@ -38,7 +38,7 @@ The technical information can be found on [etherscan.io](https://etherscan.io/to
 
 ## Tags and Arch
 
-Starting with version v0.3.0, the images are multi-arch, with builds for amd64, arm64 and armv7.
+Starting with version v0.3.1, the images are multi-arch, with builds for amd64, arm64, armv7 and armv6.
 * `vN.N.N` - for example v0.3.0
 * `latest` - always pointing to the latest version
 * `dev-branch` - the last build on a feature/development branch
