@@ -38,7 +38,7 @@ def configure_logging():
         )
         LOG.addHandler(GELF)
         gelf_enabled = True
-    LOG.info('Initialized logging with GELF enabled: {}'.format(gelf_enabled))
+    LOG.info(f'Initialized logging with GELF enabled: {gelf_enabled}')
 
 
 class EtherscanCollector:
@@ -77,18 +77,18 @@ class EtherscanCollector:
                 decimals = 18
                 if token.get('decimals', -1) >= 0:
                     decimals = int(token['decimals'])
-                LOG.debug('{} decimals for {}'.format(decimals, token['short']))
+                LOG.debug(f"{decimals} decimals for {token['short']}")
                 try:
                     req = requests.get(self.settings['url'], params=request_data).json()
                 except (
                         requests.exceptions.ConnectionError,
                         requests.exceptions.ReadTimeout,
                 ) as error:
-                    LOG.exception('Exception caught: {}'.format(error))
+                    LOG.exception(f'Exception caught: {error}')
                     req = {}
                 if req.get('result') and int(req['result']) > 0:
                     self.tokens.update({
-                        '{}-{}'.format(account, token['short']): {
+                        f"{account}-{token['short']}": {
                             'account': account,
                             'name': token['name'],
                             'name_short': token['short'],
@@ -97,7 +97,7 @@ class EtherscanCollector:
                         }
                     })
 
-        LOG.debug('Tokens: {}'.format(self.tokens))
+        LOG.debug(f'Tokens: {self.tokens}')
 
     def get_balances(self):
         """ Gets the current balance for an account """
@@ -108,21 +108,21 @@ class EtherscanCollector:
             'tag': 'latest',
             'apikey': self.settings['api_key'],
         }
-        LOG.debug('Request data: {}'.format(request_data))
+        LOG.debug(f'Request data: {request_data}')
         try:
             req = requests.get(self.settings['url'], params=request_data).json()
         except (
                 requests.exceptions.ConnectionError,
                 requests.exceptions.ReadTimeout,
         ) as error:
-            LOG.exception('Exception caught: {}'.format(error))
+            LOG.exception(f'Exception caught: {error}')
             req = {}
         if req.get('message') == 'OK' and req.get('result'):
             for result in req.get('result'):
                 self.accounts.update({
                     result['account']: float(result['balance'])/(1000000000000000000)
                 })
-        LOG.debug('Accounts: {}'.format(self.accounts))
+        LOG.debug(f'Accounts: {self.accounts}')
 
     def describe(self):
         """ Just a needed method, so that collect() isn't called at startup """
@@ -166,9 +166,9 @@ class EtherscanCollector:
 
 if __name__ == '__main__':
     configure_logging()
-    PORT = int(os.environ.get('PORT', 9308))
-    LOG.info("Starting {} {} on port {}".format(FILENAME, version, PORT))
+    port = int(os.environ.get('PORT', 9308))
+    LOG.info(f'Starting {__package__} {version} on port {port}')
     REGISTRY.register(EtherscanCollector())
-    start_http_server(PORT)
+    start_http_server(port)
     while True:
         time.sleep(1)
