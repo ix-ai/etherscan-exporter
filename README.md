@@ -15,7 +15,7 @@ docker run --rm -it -p 9308:9308 \
   -e ADDRESSES="0x90833394dB1b53f08B9D97dab8BEFf69FCf3bA49" \
   -e TOKENS='[{"contract":"0x9b70740e708a083c6ff38df52297020f5dfaa5ee","name":"Daneel","short":"DAN","decimals": 10},{"contract":"0xd26114cd6EE289AccF82350c8d8487fedB8A0C07","name":"OmiseGO","short":"OMG","decimals":18}]'
   --name etherscan-exporter \
-  registry.gitlab.com/ix.ai/etherscan-exporter:latest
+  ixdotai/etherscan-exporter:latest
 ```
 
 ## Supported variables:
@@ -41,7 +41,6 @@ The technical information can be found on [etherscan.io](https://etherscan.io/to
 Starting with version v0.3.1, the images are multi-arch, with builds for amd64, arm64, armv7 and armv6.
 * `vN.N.N` - for example v0.3.0
 * `latest` - always pointing to the latest version
-* `dev-branch` - the last build on a feature/development branch
 * `dev-master` - the last build on the master branch
 
 ## Resources:
