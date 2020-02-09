@@ -19,14 +19,17 @@ docker run --rm -it -p 9308:9308 \
 ```
 
 ## Supported variables:
-* `API_KEY` (no default - **mandatory**) - set this to your Etherscan API key
-* `URL` (default: https://api.etherscan.io/api) - set this to your Etherscan API secret
-* `ADDRESSES` (no default) - a comma separated list of the ETH addresses to export
-* `TOKENS` (no default) - a JSON object with the list of tokens to export (see below)
-* `GELF_HOST` (no default) - if set, the exporter will also log to this [GELF](https://docs.graylog.org/en/3.0/pages/gelf.html) capable host on UDP
-* `GELF_PORT` (defaults to `12201`) - the port to use for GELF logging
-* `PORT` (defaults to `9308`) - the listen port for the exporter
-* `LOGLEVEL` (defaults to `INFO`)
+
+| **Variable** | **Default**                    | **Mandatory** | **Description**  |
+|:-------------|:------------------------------:|:-------------:|:-----------------|
+| `API_KEY`    | -                              | **YES**       | set this to your Etherscan API key |
+| `URL`        | `https://api.etherscan.io/api` | NO            | The URL of the Etherscan API |
+| `ADDRESSES`  | -                              | NO            | A comma separated list of the ETH addresses to export |
+| `TOKENS`     | -                              | NO            | A JSON object with the list of tokens to export (see [below](#tokens-variable)) |
+| `LOGLEVEL`   | `INFO`                         | NO            | [Logging Level](https://docs.python.org/3/library/logging.html#levels) |
+| `GELF_HOST`  | -                              | NO            | If set, the exporter will also log to this [GELF](https://docs.graylog.org/en/3.0/pages/gelf.html) capable host on UDP |
+| `GELF_PORT`  | `12201`                        | NO            | Ignored, if `GELF_HOST` is unset. The UDP port for GELF logging |
+| `PORT`       | `9308`                         | NO            | The port for prometheus metrics |
 
 ## Tokens variable:
 Example:
