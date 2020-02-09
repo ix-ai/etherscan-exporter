@@ -4,44 +4,13 @@
 import logging
 import time
 import os
-import sys
 import json
 import requests
-import pygelf
-from prometheus_client import start_http_server
-from prometheus_client.core import REGISTRY, GaugeMetricFamily
-from .lib import constants
 
-LOG = logging.getLogger(__name__)
-logging.basicConfig(
-    stream=sys.stdout,
-    level=os.environ.get("LOGLEVEL", "INFO"),
-    format='%(asctime)s.%(msecs)03d %(levelname)s {%(module)s} [%(funcName)s] %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
-
-FILENAME = os.path.splitext(sys.modules['__main__'].__file__)[0]
-version = f'{constants.VERSION}-{constants.BUILD}'
+log = logging.getLogger(__package__)
 
 
-def configure_logging():
-    """ Configures the logging """
-    gelf_enabled = False
-
-    if os.environ.get('GELF_HOST'):
-        GELF = pygelf.GelfUdpHandler(
-            host=os.environ.get('GELF_HOST'),
-            port=int(os.environ.get('GELF_PORT', 12201)),
-            debug=True,
-            include_extra_fields=True,
-            _ix_id=FILENAME
-        )
-        LOG.addHandler(GELF)
-        gelf_enabled = True
-    LOG.info(f'Initialized logging with GELF enabled: {gelf_enabled}')
-
-
-class EtherscanCollector:
+class Etherscan:
     """ The EtherscanCollector class """
 
     accounts = {}
@@ -62,10 +31,10 @@ class EtherscanCollector:
 
     def get_tokens(self):
         """ Gets the tokens from an account """
-
-        time.sleep(1)  # Ensure that we don't get rate limited
+        log.info('Retrieving the tokens')
         for account in self.accounts:
             for token in self.settings['tokens']:
+                log.debug(f"Retrieving the balance for {token['short']} on the account {account}")
                 request_data = {
                     'module': 'account',
                     'action': 'tokenbalance',
@@ -77,14 +46,13 @@ class EtherscanCollector:
                 decimals = 18
                 if token.get('decimals', -1) >= 0:
                     decimals = int(token['decimals'])
-                LOG.debug(f"{decimals} decimals for {token['short']}")
                 try:
                     req = requests.get(self.settings['url'], params=request_data).json()
                 except (
                         requests.exceptions.ConnectionError,
                         requests.exceptions.ReadTimeout,
                 ) as error:
-                    LOG.exception(f'Exception caught: {error}')
+                    log.exception(f'Exception caught: {error}')
                     req = {}
                 if req.get('result') and int(req['result']) > 0:
                     self.tokens.update({
@@ -96,11 +64,13 @@ class EtherscanCollector:
                             'value': int(req['result']) / (10**decimals) if decimals > 0 else int(req['result'])
                         }
                     })
-
-        LOG.debug(f'Tokens: {self.tokens}')
+                time.sleep(1)  # Ensure that we don't get rate limited
+        log.debug(f'Tokens: {self.tokens}')
+        return self.tokens
 
     def get_balances(self):
         """ Gets the current balance for an account """
+        log.info('Retrieving the account balances')
         request_data = {
             'module': 'account',
             'action': 'balancemulti',
@@ -108,67 +78,18 @@ class EtherscanCollector:
             'tag': 'latest',
             'apikey': self.settings['api_key'],
         }
-        LOG.debug(f'Request data: {request_data}')
         try:
             req = requests.get(self.settings['url'], params=request_data).json()
         except (
                 requests.exceptions.ConnectionError,
                 requests.exceptions.ReadTimeout,
         ) as error:
-            LOG.exception(f'Exception caught: {error}')
+            log.exception(f'Exception caught: {error}')
             req = {}
         if req.get('message') == 'OK' and req.get('result'):
             for result in req.get('result'):
                 self.accounts.update({
                     result['account']: float(result['balance'])/(1000000000000000000)
                 })
-        LOG.debug(f'Accounts: {self.accounts}')
-
-    def describe(self):
-        """ Just a needed method, so that collect() isn't called at startup """
-        return []
-
-    def collect(self):
-        """The method that actually does the collecting"""
-        metrics = {
-            'account_balance': GaugeMetricFamily(
-                'account_balance',
-                'Account Balance',
-                labels=['source_currency', 'currency', 'account', 'type']
-            ),
-        }
-        self.get_balances()
-        for account in self.accounts:
-            metrics['account_balance'].add_metric(
-                value=(self.accounts[account]),
-                labels=[
-                    'ETH',
-                    'ETH',
-                    account,
-                    'etherscan'
-                ]
-            )
-
-        self.get_tokens()
-        for token in self.tokens:
-            metrics['account_balance'].add_metric(
-                value=(self.tokens[token]['value']),
-                labels=[
-                    self.tokens[token]['name_short'],
-                    self.tokens[token]['name_short'],
-                    self.tokens[token]['account'],
-                    'etherscan'
-                ]
-            )
-        for metric in metrics.values():
-            yield metric
-
-
-if __name__ == '__main__':
-    configure_logging()
-    port = int(os.environ.get('PORT', 9308))
-    LOG.info(f'Starting {__package__} {version} on port {port}')
-    REGISTRY.register(EtherscanCollector())
-    start_http_server(port)
-    while True:
-        time.sleep(1)
+        log.debug(f'Accounts: {self.accounts}')
+        return self.accounts
