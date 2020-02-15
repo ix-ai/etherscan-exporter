@@ -26,7 +26,7 @@ class EtherscanCollector:
             'account_balance': GaugeMetricFamily(
                 'account_balance',
                 'Account Balance',
-                labels=['source_currency', 'currency', 'account', 'type']
+                labels=['currency', 'account', 'type']
             ),
         }
         accounts = self.etherscan.get_balances()
@@ -34,7 +34,6 @@ class EtherscanCollector:
             metrics['account_balance'].add_metric(
                 value=(accounts[account]),
                 labels=[
-                    'ETH',
                     'ETH',
                     account,
                     'etherscan'
@@ -46,7 +45,6 @@ class EtherscanCollector:
             metrics['account_balance'].add_metric(
                 value=(tokens[token]['value']),
                 labels=[
-                    tokens[token]['name_short'],
                     tokens[token]['name_short'],
                     tokens[token]['account'],
                     'etherscan'
